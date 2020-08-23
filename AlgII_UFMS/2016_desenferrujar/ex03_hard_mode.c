@@ -3,10 +3,8 @@
 int main(void) {
     int lin, col;
 
-    /*
-     * Imprime linhas
-     * */
     for (lin=0; lin<10; lin++) {
+
         for (col=0; col <= lin; col++) {
             printf("*");
         }
@@ -34,11 +32,11 @@ int main(void) {
 
         printf("\t\t");
 
-        for (col=0; col <= 10; col++) {
-            if (col <= lin)
-                printf("*");
-            else
+        for (col=10; col >= 0; col--) {
+            if (col > lin)
                 printf(" ");
+            else
+                printf("*");
         }
 
 

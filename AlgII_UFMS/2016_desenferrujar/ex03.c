@@ -5,7 +5,7 @@ int main(void) {
 
     for (lin=0; lin<10; lin++) {
         for (col=0; col <= lin; col++) {
-            printf("*");
+            printf("* ");
         }
         printf("\n");
     }
@@ -14,7 +14,7 @@ int main(void) {
 
     for (lin=0; lin<10; lin++) {
         for (col=9; col >= lin; col--) {
-            printf("*");
+            printf("* ");
         }
         printf("\n");
     }
@@ -24,9 +24,9 @@ int main(void) {
     for (lin=0; lin<10; lin++) {
         for (col=0; col < 10; col++) {
             if (col>=lin)
-                printf("*");
+                printf("* ");
             else
-                printf(" ");
+                printf("  ");
         }
         printf("\n");
     }
@@ -35,9 +35,9 @@ int main(void) {
     for (lin=0; lin<10; lin++) {
         for (col=9; col >= 0; col--) {
             if (lin>col)
-                printf("*");
+                printf("* ");
             else
-                printf(" ");
+                printf("  ");
         }
         printf("\n");
     }

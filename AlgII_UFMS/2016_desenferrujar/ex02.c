@@ -10,9 +10,9 @@ int quadrado, linha, coluna;
 	for (linha = 0; linha < quadrado; linha++) {
 		for(coluna = 0; coluna < quadrado; coluna++) {
 			if((coluna == 0) || (coluna == quadrado-1) || (linha == 0) || (linha == quadrado-1))
-				printf("*");
+				printf("* ");
 			else
-				printf(" ");
+				printf("  ");
 		}
 		printf("\n");
 	}

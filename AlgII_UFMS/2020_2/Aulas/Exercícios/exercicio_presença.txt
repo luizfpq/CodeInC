@@ -1,0 +1,3 @@
+Leia um arquivo de texto contendo uma série de inteiros positivos não nulos e não necessariamente ordenados, escolhendo entre usar listas, filas ou pilhas, imprima os ímpares em ordem crescente e os pares em ordem decrescente.
+
+Explique as escolhas de algoritmos de busca/ordenação, listas, filas ou pilhas que usar na solução do problema.

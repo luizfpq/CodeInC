@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 2147483647;
-#define MIN -2147483647;
+#define MAX 100;
 
 /*
  * Recebe um ponteiro t para o topo de uma pilha P

@@ -3,189 +3,240 @@
 #include <string.h>
 #include <ctype.h>
 
-typedef struct _RegPilha{
- char dado;
- struct _RegPilha *prox;
-} RegPilha;
-typedef RegPilha* Pilha;
-typedef enum boolean {false,true} bool;
+#define MAX 100
+
+typedef struct _stackRegister{
+ char data;
+ struct _stackRegister *next;
+} stackRegister;
+typedef stackRegister* Stack;
+
+/***
+ * Funções de inicialização
+ */ 
+void verifyArgs(int argc);
+
 /***
  * Funções de manipulação de pilhas
  */ 
-RegPilha *AlocaRegPilha();
-Pilha CriaPilha();
-void LiberaPilha(Pilha p);
-bool PilhaVazia(Pilha p);
-void Empilha(Pilha p, char x);
-char Desempilha(Pilha p);
+stackRegister *allocStackRegister();
+Stack         createStack();
+void          freeStack(Stack p);
+void          pushStack(Stack p, char x);
+char          popStack(Stack p);
+
 /***
  * Funções de conversão infixa/posfixa
  */ 
-int Prioridade(char c, char t);
-void In2Pos(char expr[]);
+int           priority(char c, char t);
+void          convertPostFix(char expr[]);
 
 
 /***
- * MAIN
+ * Principal
  */ 
 int main(int argc, char const *argv[])
 {
   FILE *arq;
-  char Linha[100];
+  char Linha[MAX];
   char *result;
-  int i;
+  int iteration, numEntries;
   
-  printf("%d\n", argc);
-    return 1;
-
-  if (argc == 1) {
-    printf("Arquivo de entrada não recebido");
-    return 0;
-  } else if (argc > 2) {
-    printf("Excesso de parametros de entrada");
-    return 0;
-  }
+  /***
+   * Verifica se os parametros foram passados
+   */ 
+  verifyArgs(argc);
   
-  
-
-  /* Abre um arquivo TEXTO para LEITURA*/
-  arq = fopen(argv[1], "rt");
-  if (arq == NULL)  /* Se houve erro na abertura*/
-  {
+  /* Abre um arquivo TEXTO */
+  arq = fopen(argv[1], "r");
+  /* Se houve erro na abertura*/
+  if (arq == NULL)  {
      printf("Problemas na abertura do arquivo\n");
-     return 1;
+     exit(-1);
   }
-  i = 1;
-  while (!feof(arq))
-  {
-	/* Lê uma linha (inclusive com o '\n') */
-       result = fgets(Linha, 100, arq);  /* o 'fgets' lê até 99 caracteres ou até o '\n' */
-      if (result)  /* Se foi possível ler */
-	    printf("Linha %d : %s",i,Linha);
-      i++;
+  /***
+   * Lê uma linha (inclusive com o '\n') 
+   * o 'fgets' lê até 99 caracteres ou até o '\n'
+   */
+  result = fgets(Linha, MAX, arq);
+  numEntries = atoi(Linha); 
+
+  for (iteration = 0; iteration < numEntries; iteration++) {
+    result = fgets(Linha, MAX, arq);
+    /*caso a linha esteja OK*/
+    if(result){
+      convertPostFix(Linha);
+      
+    }
   }
-  fclose(arq);
   return 0;
 }
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***
+ * validamos os argumentos de chamada
+ */ 
+void verifyArgs(int argc){
+  if (argc == 1) {
+    printf("Arquivo de entrada não recebido");
+    exit(-1);
+  } else if (argc > 2) {
+    printf("Excesso de parametros de entrada");
+    exit(-1);
+  }
+}
 /***
  * Funções de manipulação de pilhas
  */ 
-RegPilha *AlocaRegPilha(){
- RegPilha* q;
- q = (RegPilha*)calloc(1, sizeof(RegPilha));
- if(q==NULL) exit(-1);
+stackRegister *allocStackRegister(){
+ stackRegister* q;
+ q = (stackRegister*)calloc(1, sizeof(stackRegister));
+ if(q==NULL)
+  exit(-1);
  return q;
 }
 
-Pilha CriaPilha(){
- Pilha p;
- p = AlocaRegPilha();
- p->prox = NULL;
+Stack createStack(){
+ Stack p;
+ p = allocStackRegister();
+ p->next = NULL;
  return p;
 }
 
-void LiberaPilha(Pilha p){
- RegPilha *q,*t;
+void freeStack(Stack p){
+ stackRegister *q,*t;
  q = p;
  while(q!=NULL){
  t = q;
- q = q->prox;
+ q = q->next;
  free(t);
  }
 }
 
-bool PilhaVazia(Pilha p){
- return (p->prox==NULL);
+
+void pushStack(Stack p, char x){
+ stackRegister *q;
+ q = allocStackRegister();
+ q->data = x;
+ q->next = p->next;
+ p->next = q;
 }
 
-void Empilha(Pilha p, char x){
- RegPilha *q;
- q = AlocaRegPilha();
- q->dado = x;
- q->prox = p->prox;
- p->prox = q;
-}
-
-char Desempilha(Pilha p){
- RegPilha *q;
+char popStack(Stack p){
+ stackRegister *q;
  char x;
- q = p->prox;
- if(q==NULL) exit(-1);
- x = q->dado;
- p->prox = q->prox;
+ q = p->next;
+ if(q==NULL)
+  exit(-1);
+ x = q->data;
+ p->next = q->next;
  free(q);
  return x;
 }
 
 
 /***
- * Funções de manipulação de arquivos
- */ 
-
-
-/***
  * Funções de conversão infixa / posfixa
  */ 
-int Prioridade(char c, char t){
-  int pc,pt;
+int priority(char c, char t){
+  int pchar, ptest;
  
   if(c == '^')
-    pc = 4;
+    pchar = 4;
   else if(c == '*' || c == '/')
-    pc = 2;
+    pchar = 2;
   else if(c == '+' || c == '-')
-    pc = 1;
+    pchar = 1;
   else if(c == '(')
-    pc = 4;
+    pchar = 4;
  
   if(t == '^')
-    pt = 3;
+    ptest = 3;
   else if(t == '*' || t == '/')
-    pt = 2;
+    ptest = 2;
   else if(t == '+' || t == '-')
-    pt = 1;
+    ptest = 1;
   else if(t == '(')
-    pt = 0;
+    ptest = 0;
  
-  return (pc > pt);
+  return (pchar > ptest);
 }
-
-void In2Pos(char expr[]){
-  Pilha p;
+/***
+ * Convertemos de infixa para pos fixa
+ */ 
+void convertPostFix(char expr[]){
+  Stack p;
   int i = 0;
-  char c,t;
+  char c, t;
  
-  p = CriaPilha();
-  Empilha(p, '(');
+  p = createStack();
+  pushStack(p, '(');
  
   do{
     c = expr[i];
     i++;
-    if(c >= '0' && c <= '9'){
+    /*ignora os espaços*/
+    if (c != ' '){
+      /*caso seja um numero imprime*/
+      if(c >= '0' && c <= '9'){
       printf("%c", c);
     }
+    /***
+     * se abrir parenteses empilha
+     */ 
     else if(c == '('){
-      Empilha(p, '(');
+      pushStack(p, '(');
     }
+    /***
+     * se fechar parenteses desempilha 
+     * até chegar no próximo abre parenteses
+     */ 
     else if(c == ')' || c == '\0'){
       do{
-        t = Desempilha(p);
+        t = popStack(p);
         if(t != '(')
-          printf("%c", t);
+          printf("%c ", t);
       }while(t != '(');
     }
     else if(c == '+' || c == '-' || 
             c == '*' || c == '/' ||
             c == '^' ){
       while(1){
-        t = Desempilha(p);
-        if(Prioridade(c,t)){
-          Empilha(p, t);
-          Empilha(p, c);
+        t = popStack(p);
+        if(priority(c, t)){
+          pushStack(p, t);
+          pushStack(p, c);
           break;
         }
         else{
@@ -193,7 +244,8 @@ void In2Pos(char expr[]){
         }
       }
     }
+    }
   }while(c != '\0');
   printf("\n");
-  LiberaPilha(p);
+  freeStack(p);
 }

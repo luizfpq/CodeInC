@@ -39,11 +39,6 @@ Stack         convertPostFix(char expr[]);
 Stack         invertStack(Stack stack);
 
 /***
- * Funções de calculo
- */ 
-int           calcula(char expr[]);
-
-/***
  * Principal
  */ 
 int main(int argc, char const *argv[]) {
@@ -80,6 +75,7 @@ int main(int argc, char const *argv[]) {
       finalStack = invertStack(convertPostFix(Linha));
       
       outputFileFeed(argv, finalStack);
+      
     }
   }
 
@@ -87,8 +83,8 @@ int main(int argc, char const *argv[]) {
   return 0;
 }
 
-
-
+/* Código a seguir*/
+/*      ↓         */
 
 
 
@@ -296,8 +292,8 @@ Stack convertPostFix(char expr[]){
      * se abrir parenteses empilha
      */ 
     else if(cell == '('){
-      if (i != 1)
-        controll = 1;
+      if (i != 1) 
+          controll = 1;
       pushStack(baseStack, '(');
     }
     /***
@@ -309,16 +305,11 @@ Stack convertPostFix(char expr[]){
       do{
         t = popStack(baseStack);
         if(t != '('){
-          if (controll == 0) 
-            pushStack(returnStack, ' ');
+          pushStack(returnStack, ' ');
           pushStack(returnStack, t);
-          if (controll == 0) 
-            pushStack(returnStack, ' ');
           /* tratamos para não ter um espaço no primeiro elemento */
           if (i != 1)
             controll = 1;
-          
-          
         }
       }while(t != '(');
     }

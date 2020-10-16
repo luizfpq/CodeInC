@@ -6,7 +6,7 @@
 #define MAX 100
 
 typedef struct _stackRegister{
- char data;
+ char data[MAX];
  struct _stackRegister *next;
 } stackRegister;
 typedef stackRegister* Stack;
@@ -39,6 +39,11 @@ Stack         convertPostFix(char expr[]);
 Stack         invertStack(Stack stack);
 
 /***
+ * Funções de calculo
+ */ 
+char          calcPostfix(Stack stack);
+
+/***
  * Principal
  */ 
 int main(int argc, char const *argv[]) {
@@ -46,7 +51,8 @@ int main(int argc, char const *argv[]) {
   char Linha[MAX];
   char *result;
   int iteration, numEntries;
-  Stack finalStack;
+  Stack finalStack, calcStack;
+  calcStack = createStack();
   finalStack = createStack();
 
   /***
@@ -73,9 +79,9 @@ int main(int argc, char const *argv[]) {
     /*caso a linha esteja OK*/
     if(result){
       finalStack = invertStack(convertPostFix(Linha));
-      
+      calcStack = convertPostFix(Linha);
       outputFileFeed(argv, finalStack);
-      
+      calcPostfix(calcStack);
     }
   }
 
@@ -211,7 +217,7 @@ void freeStack(Stack baseStack){
 }
 
 
-void pushStack(Stack baseStack, char x){
+void pushStack(Stack baseStack, char x[]){
  stackRegister *q;
  q = allocStackRegister();
  q->data = x;
@@ -334,4 +340,46 @@ Stack convertPostFix(char expr[]){
   }while(cell != '\0');
   freeStack(baseStack);
   return returnStack;
+}
+
+char calcPostfix(Stack stack) {
+  Stack calcStack;
+  int num1, num2;
+  char tempChar;
+  calcStack = allocStackRegister();
+  calcStack->next = NULL;
+
+  while (stack->next != NULL) {
+    tempChar = popStack(stack);
+    /* se for numero, coloca na pilha de calculo
+     */
+        if (isdigit(tempChar))  {
+            pushStack(calcStack, tempChar); 
+        }
+        /*se for um operador, pega dois elementos e calculo*/
+        else { 
+            num1 = popStack(stack); 
+            num2 = popStack(stack); 
+            switch (tempChar)  { 
+            case '+': 
+              printf("Somando: %d + %d", num2, num1);
+              pushStack(calcStack, num2 + num1); 
+              break; 
+            case '-': 
+              printf("Subtraindo: %d - %d", num2, num1);
+              pushStack(calcStack, num2 - num1); 
+              break; 
+            case '*': 
+              printf("mult: %d * %d", num2, num1);
+              pushStack(calcStack, num2 * num1); 
+              break; 
+            case '/': 
+              printf("div: %d / %d", num2, num1);
+              pushStack(calcStack, num2/num1); 
+              break; 
+            } 
+        } 
+      
+  }  
+  return popStack(calcStack);
 }

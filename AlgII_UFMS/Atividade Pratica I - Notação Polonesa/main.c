@@ -14,34 +14,46 @@ typedef stackRegister* Stack;
 /***
  * Funções de inicialização
  */ 
-void verifyArgs(int argc);
+void          verifyArgs(int argc);
+
+/***
+ * Manipulação de arquivos
+ */
+void          outputFileCreate(char const *argv[], int numEntries);
+void          outputFileFeed(char const *argv[], Stack finalStack);
 
 /***
  * Funções de manipulação de pilhas
  */ 
 stackRegister *allocStackRegister();
 Stack         createStack();
-void          freeStack(Stack p);
-void          pushStack(Stack p, char x);
-char          popStack(Stack p);
+void          freeStack(Stack baseStack);
+void          pushStack(Stack baseStack, char x);
+char          popStack(Stack baseStack);
 
 /***
  * Funções de conversão infixa/posfixa
  */ 
-int           priority(char c, char t);
-void          convertPostFix(char expr[]);
+int           priority(char cell, char t);
+Stack         convertPostFix(char expr[]);
+Stack         invertStack(Stack stack);
 
+/***
+ * Funções de calculo
+ */ 
+int           calcula(char expr[]);
 
 /***
  * Principal
  */ 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
   FILE *arq;
   char Linha[MAX];
   char *result;
   int iteration, numEntries;
-  
+  Stack finalStack;
+  finalStack = createStack();
+
   /***
    * Verifica se os parametros foram passados
    */ 
@@ -60,15 +72,18 @@ int main(int argc, char const *argv[])
    */
   result = fgets(Linha, MAX, arq);
   numEntries = atoi(Linha); 
-
+  outputFileCreate(argv, numEntries);
   for (iteration = 0; iteration < numEntries; iteration++) {
     result = fgets(Linha, MAX, arq);
     /*caso a linha esteja OK*/
     if(result){
-      convertPostFix(Linha);
+      finalStack = invertStack(convertPostFix(Linha));
       
+      outputFileFeed(argv, finalStack);
     }
   }
+
+  fclose(arq);
   return 0;
 }
 
@@ -117,6 +132,51 @@ void verifyArgs(int argc){
   }
 }
 /***
+ * ajustamos o arquivo de saida
+ */
+void outputFileCreate(char const *argv[], int numEntries){
+  
+  char *outputFileName = (char *)calloc(1, sizeof(argv[1])+1);
+  char *entries = (char *)calloc(1, sizeof(numEntries));
+  FILE *outFile;
+  
+  sprintf(entries, "%i", numEntries);
+
+  strcpy(outputFileName, argv[1]);
+  
+  outputFileName[sizeof(argv[1])+1] = 'o';
+  outputFileName[sizeof(argv[1])+2] = 'u';
+  outputFileName[sizeof(argv[1])+3] = 't';
+  
+  outFile = fopen(outputFileName, "a+");
+  fputs(entries, outFile);
+  fputs("\n", outFile);
+
+  fclose(outFile);
+
+}
+void outputFileFeed(char const *argv[], Stack finalStack){
+  
+  char *outputFileName = (char *)calloc(1, sizeof(argv[1])+1);
+  FILE *outFile;
+ 
+  strcpy(outputFileName, argv[1]);
+  
+  outputFileName[sizeof(argv[1])+1] = 'o';
+  outputFileName[sizeof(argv[1])+2] = 'u';
+  outputFileName[sizeof(argv[1])+3] = 't';
+  
+  outFile = fopen(outputFileName, "a+");
+  while (finalStack->next != NULL){
+    fputc(popStack(finalStack), outFile);
+  }
+  fputs("; \n", outFile);
+    
+  fclose(outFile);
+
+}
+
+/***
  * Funções de manipulação de pilhas
  */ 
 stackRegister *allocStackRegister(){
@@ -128,15 +188,25 @@ stackRegister *allocStackRegister(){
 }
 
 Stack createStack(){
- Stack p;
- p = allocStackRegister();
- p->next = NULL;
- return p;
+ Stack baseStack;
+ baseStack = allocStackRegister();
+ baseStack->next = NULL;
+ return baseStack;
 }
 
-void freeStack(Stack p){
+Stack invertStack(Stack stack) {
+  Stack tempStack;
+  tempStack = allocStackRegister();
+  tempStack->next = NULL;
+  while (stack->next != NULL) {
+    pushStack(tempStack, popStack(stack));
+  }
+  return tempStack;
+}
+
+void freeStack(Stack baseStack){
  stackRegister *q,*t;
- q = p;
+ q = baseStack;
  while(q!=NULL){
  t = q;
  q = q->next;
@@ -145,22 +215,22 @@ void freeStack(Stack p){
 }
 
 
-void pushStack(Stack p, char x){
+void pushStack(Stack baseStack, char x){
  stackRegister *q;
  q = allocStackRegister();
  q->data = x;
- q->next = p->next;
- p->next = q;
+ q->next = baseStack->next;
+ baseStack->next = q;
 }
 
-char popStack(Stack p){
+char popStack(Stack baseStack){
  stackRegister *q;
  char x;
- q = p->next;
+ q = baseStack->next;
  if(q==NULL)
   exit(-1);
  x = q->data;
- p->next = q->next;
+ baseStack->next = q->next;
  free(q);
  return x;
 }
@@ -169,25 +239,25 @@ char popStack(Stack p){
 /***
  * Funções de conversão infixa / posfixa
  */ 
-int priority(char c, char t){
+int priority(char cell, char testCell){
   int pchar, ptest;
  
-  if(c == '^')
+  if(cell == '^')
     pchar = 4;
-  else if(c == '*' || c == '/')
+  else if(cell == '*' || cell == '/')
     pchar = 2;
-  else if(c == '+' || c == '-')
+  else if(cell == '+' || cell == '-')
     pchar = 1;
-  else if(c == '(')
+  else if(cell == '(')
     pchar = 4;
  
-  if(t == '^')
+  if(testCell == '^')
     ptest = 3;
-  else if(t == '*' || t == '/')
+  else if(testCell == '*' || testCell == '/')
     ptest = 2;
-  else if(t == '+' || t == '-')
+  else if(testCell == '+' || testCell == '-')
     ptest = 1;
-  else if(t == '(')
+  else if(testCell == '(')
     ptest = 0;
  
   return (pchar > ptest);
@@ -195,57 +265,82 @@ int priority(char c, char t){
 /***
  * Convertemos de infixa para pos fixa
  */ 
-void convertPostFix(char expr[]){
-  Stack p;
+Stack convertPostFix(char expr[]){
+  Stack baseStack, returnStack;
   int i = 0;
-  char c, t;
+  int controll = 0;
+  char cell, t;
  
-  p = createStack();
-  pushStack(p, '(');
+  baseStack = createStack();
+  returnStack = createStack();
+  pushStack(baseStack, '(');
  
   do{
-    c = expr[i];
+    cell = expr[i];
     i++;
+    
     /*ignora os espaços*/
-    if (c != ' '){
+    if (cell != ' '){
       /*caso seja um numero imprime*/
-      if(c >= '0' && c <= '9'){
-      printf("%c", c);
+      if(cell >= '0' && cell <= '9'){
+        /**
+         * controll sendo 1, insere espaços para separar 
+         * numeros inteiros  e operadores
+         */
+        if (controll == 1) 
+          pushStack(returnStack, ' ');  
+        pushStack(returnStack, cell); 
+        controll = 0;
     }
     /***
      * se abrir parenteses empilha
      */ 
-    else if(c == '('){
-      pushStack(p, '(');
+    else if(cell == '('){
+      if (i != 1)
+        controll = 1;
+      pushStack(baseStack, '(');
     }
     /***
      * se fechar parenteses desempilha 
      * até chegar no próximo abre parenteses
      */ 
-    else if(c == ')' || c == '\0'){
+    else if(cell == ')' || cell == '\0'){
+      
       do{
-        t = popStack(p);
-        if(t != '(')
-          printf("%c ", t);
+        t = popStack(baseStack);
+        if(t != '('){
+          if (controll == 0) 
+            pushStack(returnStack, ' ');
+          pushStack(returnStack, t);
+          if (controll == 0) 
+            pushStack(returnStack, ' ');
+          /* tratamos para não ter um espaço no primeiro elemento */
+          if (i != 1)
+            controll = 1;
+          
+          
+        }
       }while(t != '(');
     }
-    else if(c == '+' || c == '-' || 
-            c == '*' || c == '/' ||
-            c == '^' ){
+    else if(cell == '+' || cell == '-' || 
+            cell == '*' || cell == '/' ||
+            cell == '^' ){
+      controll = 1;
       while(1){
-        t = popStack(p);
-        if(priority(c, t)){
-          pushStack(p, t);
-          pushStack(p, c);
+        
+        t = popStack(baseStack);
+        if(priority(cell, t)){
+          pushStack(baseStack, t);
+          pushStack(baseStack, cell);
           break;
-        }
-        else{
-          printf("%c", t);
+        } else {
+          pushStack(returnStack, ' ');
+          pushStack(returnStack, t);
         }
       }
     }
-    }
-  }while(c != '\0');
-  printf("\n");
-  freeStack(p);
+    }    
+  }while(cell != '\0');
+  freeStack(baseStack);
+  return returnStack;
 }

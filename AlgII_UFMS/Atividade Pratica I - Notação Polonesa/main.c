@@ -28,7 +28,7 @@ void          outputFileFeed(char const *argv[], Stack finalStack);
 stackRegister *allocStackRegister();
 Stack         createStack();
 void          freeStack(Stack baseStack);
-void          pushStack(Stack baseStack, char x);
+void          pushStack(Stack baseStack, char x[]);
 char          popStack(Stack baseStack);
 
 /***
@@ -220,7 +220,7 @@ void freeStack(Stack baseStack){
 void pushStack(Stack baseStack, char x[]){
  stackRegister *q;
  q = allocStackRegister();
- q->data = x;
+ strcpy(q->data, x);
  q->next = baseStack->next;
  baseStack->next = q;
 }

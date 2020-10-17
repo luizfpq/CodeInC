@@ -6,7 +6,7 @@
 #define MAX 100
 
 typedef struct _stackRegister{
- char data[MAX];
+ char data;
  struct _stackRegister *next;
 } stackRegister;
 typedef stackRegister* Stack;
@@ -28,7 +28,7 @@ void          outputFileFeed(char const *argv[], Stack finalStack);
 stackRegister *allocStackRegister();
 Stack         createStack();
 void          freeStack(Stack baseStack);
-void          pushStack(Stack baseStack, char x[]);
+void          pushStack(Stack baseStack, char x);
 char          popStack(Stack baseStack);
 
 /***
@@ -217,10 +217,10 @@ void freeStack(Stack baseStack){
 }
 
 
-void pushStack(Stack baseStack, char x[]){
+void pushStack(Stack baseStack, char x){
  stackRegister *q;
  q = allocStackRegister();
- strcpy(q->data, x);
+ q->data = x;
  q->next = baseStack->next;
  baseStack->next = q;
 }
@@ -377,7 +377,10 @@ char calcPostfix(Stack stack) {
               printf("div: %d / %d", num2, num1);
               pushStack(calcStack, num2/num1); 
               break; 
+            case ' ':
+              
             } 
+
         } 
       
   }  

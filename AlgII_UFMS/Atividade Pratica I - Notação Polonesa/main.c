@@ -313,6 +313,11 @@ Stack convertPostFix(char expr[]){
         }
       }while(t != '(');
     }
+    /***
+     * caso encontre algum dos operadores, 
+     * verifica a prioridade e altera sua
+     * posição na pilha de acordo com a necessidade
+     */ 
     else if(cell == '+' || cell == '-' || 
             cell == '*' || cell == '/' ||
             cell == '^' ){

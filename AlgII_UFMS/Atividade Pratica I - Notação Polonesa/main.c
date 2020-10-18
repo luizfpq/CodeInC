@@ -3,32 +3,58 @@
 #include <string.h>
 #include <ctype.h>
 
-#define MAX 100
-
+/* tinha utilizado 100 para inicializar algumas cadeias de caracteres, 
+mas depois vi que não poderia usar globais, e o desativei */
+/*#define 100 100*/
+/***
+ * cria uma struc para manipular
+ * os caracteres lidos do arquivo de entrada
+ */ 
 typedef struct _stackRegister{
  char data;
  struct _stackRegister *next;
 } stackRegister;
 typedef stackRegister* Stack;
-
+/***
+ * cria uma struct para manipular os inteiros
+ * lembrando que como lemos char por char
+ * numeros como 2048 acabam ficando complicados de trabalhar
+ * portanto, no calculo final, separamos os inteiros em uma
+ * pilha específica
+ */ 
 typedef struct _stackRegisterInt{
  int value;
  struct _stackRegisterInt *next;
 } stackRegisterInt;
 typedef stackRegisterInt* StackInt;
 /***
- * Funções de inicialização
+ * Funções de inicialização,
+ * verificamos se o arquivo de entradas foi passado
+ * e respondemos com informações caso seja necessário
  */ 
 void             verifyArgs(int argc);
 
 /***
  * Manipulação de arquivos
+ * outputFileCreate: cria o arquivo de saida
+ * outputFileFeed: alimenta linha a linha o arquivo de saida
  */
 void             outputFileCreate(char const *argv[], int numEntries);
 void             outputFileFeed(char const *argv[], Stack finalStack, int calcValue);
 
 /***
  * Funções de manipulação de pilhas
+ * 
+ * createStack: efetivamente cria a pilha de caracteres;
+ * freeStack: libera a pilha de caracteres na memória;
+ * pushStack: empilha elemento na pilha de caracteres;
+ * popStack: desempilha elemento na pilha de caracteres;
+ * 
+ * createStackInt: efetivamente cria a pilha de inteiros;
+ * freeStackInt: libera a pilha de inteiros na memória;
+ * pushStackInt: empilha elemento na pilha de inteiros;
+ * popStackInt: desempilha elemento na pilha de inteiros;
+ * 
  */ 
 /* pilhas de caracteres */
 stackRegister    *allocStackRegister();
@@ -45,6 +71,10 @@ int              popStackInt(StackInt  baseStack);
 void pushCharToNum(Stack stack, StackInt stackInt);
 /***
  * Funções de conversão infixa/posfixa
+ * 
+ * priority: verifica a prioridade dos operadores para empilhar
+ * converPostFix: recebe cada linha do arquivo de entrada e devolve uma pilha posfixa
+ * invertStack: inverte as pilhas para facilitar a exibição no arquivo de saida
  */ 
 int              priority(char cell, char t);
 Stack            convertPostFix(char expr[]);
@@ -52,6 +82,7 @@ Stack            invertStack(Stack stack);
 
 /***
  * Funções de calculo
+ * calcPostFix: recebe uma pilha e calcula o valor da posfixa
  */ 
 int             calcPostFix(Stack stack);
 
@@ -60,11 +91,11 @@ int             calcPostFix(Stack stack);
  */ 
 int main(int argc, char const *argv[]) {
   FILE *arq;
-  char Linha[MAX];
+  char Linha[100];
   char *result;
   int iteration, numEntries;
   Stack finalStack, calcStack;
-  calcStack = createStack();
+  calcStack = createStack(); 
   finalStack = createStack();
 
   /***
@@ -74,25 +105,39 @@ int main(int argc, char const *argv[]) {
   
   /* Abre um arquivo TEXTO */
   arq = fopen(argv[1], "r");
-  /* Se houve erro na abertura*/
+  /* Se houve erro na abertura,
+   * dá um aviso genérico ao usuario
+   */
   if (arq == NULL)  {
      printf("Problemas na abertura do arquivo\n");
      exit(-1);
   }
   /***
-   * Lê uma linha (inclusive com o '\n') 
-   * o 'fgets' lê até 99 caracteres ou até o '\n'
+   * lê o arquivo linha a linha
    */
-  result = fgets(Linha, MAX, arq);
+  result = fgets(Linha, 100, arq);
+  /***
+   * lemos a a primeira linha separadamente 
+   * para guardar a quantidade de calculos que executaremos
+   */
   numEntries = atoi(Linha); 
+  /***
+   * criamos o arquivo de saida
+   */ 
   outputFileCreate(argv, numEntries);
+  /***
+   * nesta iteração, lendo linha a linha
+   * enviamos os caracteres de cada linha para 
+   * conversão, calculo e gravação no arquivo de saida;
+   */ 
   for (iteration = 0; iteration < numEntries; iteration++) {
-    result = fgets(Linha, MAX, arq);
+    result = fgets(Linha, 100, arq);
     /*caso a linha esteja OK*/
     if(result){
+      /* pilhas que serão manipuladas para calculo e exibição*/
       finalStack = invertStack(convertPostFix(Linha));
       calcStack =  invertStack(convertPostFix(Linha));;
-      /*TODO: inserir o resultado do calcPostFixno outputFileFeed*/
+      
       outputFileFeed(argv, finalStack, calcPostFix(calcStack));
     }
   }
@@ -101,8 +146,8 @@ int main(int argc, char const *argv[]) {
   return 0;
 }
 
-/* Código a seguir*/
-/*      ↓         */
+/* Código abaixo*/
+/*      ↓       */
 
 
 
@@ -173,23 +218,32 @@ void outputFileFeed(char const *argv[], Stack finalStack, int calcValue){
   
   char *outputFileName = (char *)calloc(1, sizeof(argv[1])+1);
   FILE *outFile;
-  char strCalcValue[MAX];
+  char strCalcValue[100];
  
+  /* transformamos o inteiro calculado em string */
   sprintf(strCalcValue, "%d", calcValue);
-  strcpy(outputFileName, argv[1]);
   
+  /***
+   * usamos o nome do arquivo de entrada
+   * e substituimos seus ultimos caracteres
+   * para criar e nomear o arquivo de saida
+   */ 
+  strcpy(outputFileName, argv[1]);
   outputFileName[sizeof(argv[1])+1] = 'o';
   outputFileName[sizeof(argv[1])+2] = 'u';
   outputFileName[sizeof(argv[1])+3] = 't';
   
+  /* abrimos o arquivo de saida */
   outFile = fopen(outputFileName, "a+");
+  /* desempilhamos formando linha a linha */
   while (finalStack->next != NULL){
     fputc(popStack(finalStack), outFile);
   }
+  /* inserimos separadores, resultados e quebras de linha */
   fputs("; ", outFile);
   fputs(strCalcValue, outFile);
   fputs("\n", outFile);
-      
+  /* finalizamos a edição do arquivo */
   fclose(outFile);
 
 }
@@ -446,7 +500,7 @@ Stack convertPostFix(char expr[]){
 int calcPostFix(Stack stack) {
   StackInt       tempStackInt;
   int            auxInt, num1, num2;
-  char           tempChar[MAX];
+  char           tempChar[100];
 
 
   tempStackInt =  createStackInt();
@@ -474,8 +528,16 @@ int calcPostFix(Stack stack) {
     else if ((tempChar[0] == ' ')) {
       popStack(stack);
     } 
-    /* trabalhamos os operadores */
+    /***
+     * Trabalhamos os operadores
+     * e realizamos as devidas operações
+     */
     else {
+      /***
+       * Quando encontramos um operador, 
+       * desempilhamos dois itens da 
+       * pilha de inteiros
+       */
       num1 = popStackInt(tempStackInt);
       num2 = popStackInt(tempStackInt);
       tempChar[0] = popStack(stack);

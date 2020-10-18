@@ -4,8 +4,8 @@
 #include <ctype.h>
 
 /***
- * AUTHOR :       Luiz Quirino
- * START DATE :   11 Out 2020
+ * AUTHOR:       Luiz Quirino - 2016.0743.003-7 
+ * DATE:         11 Out 2020
  * NOTES:
  *  Materiais que consultei:
  *      -> Materiais de aula Prof. Ivone / Prof. Ronaldo

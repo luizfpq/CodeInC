@@ -3,9 +3,17 @@
 #include <string.h>
 #include <ctype.h>
 
-/* tinha utilizado 100 para inicializar algumas cadeias de caracteres, 
-mas depois vi que não poderia usar globais, e o desativei */
-/*#define 100 100*/
+/***
+ * AUTHOR :       Luiz Quirino
+ * START DATE :   11 Out 2020
+ * NOTES:
+ *  Materiais que consultei:
+ *      -> Materiais de aula Prof. Ivone / Prof. Ronaldo
+ *      Extras:
+ *      -> https://trello.com/c/MMN6eRVF
+ */ 
+
+
 /***
  * cria uma struc para manipular
  * os caracteres lidos do arquivo de entrada
@@ -509,7 +517,7 @@ int calcPostFix(Stack stack) {
   while(stack->next != NULL) {
     /**
      * tiro e coloco o elemento só pra testá-lo
-     * a real manipulação será feita dentro da função específica
+     * a real manipulação será feita dentro da função específica (pushStackToNum)
      * pensei em modularizar, mas preferi deixar assim mais didático
      * para eu mesmo me lembrar da funcionalidade
      */
@@ -565,6 +573,10 @@ int calcPostFix(Stack stack) {
       }
     }  
   }
+  /***
+   * desempilhamos o resultado da pilha de inteiros
+   * e o retornamos
+   */
   num1 = popStackInt(tempStackInt);
   return num1;
 }

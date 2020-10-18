@@ -11,32 +11,49 @@ typedef struct _stackRegister{
 } stackRegister;
 typedef stackRegister* Stack;
 
+typedef struct _stackRegisterInt{
+ int value;
+ struct _stackRegisterInt *next;
+} stackRegisterInt;
+typedef stackRegisterInt* StackInt;
 /***
  * Funções de inicialização
  */ 
-void          verifyArgs(int argc);
+void             verifyArgs(int argc);
 
 /***
  * Manipulação de arquivos
  */
-void          outputFileCreate(char const *argv[], int numEntries);
-void          outputFileFeed(char const *argv[], Stack finalStack);
+void             outputFileCreate(char const *argv[], int numEntries);
+void             outputFileFeed(char const *argv[], Stack finalStack, int calcValue);
 
 /***
  * Funções de manipulação de pilhas
  */ 
-stackRegister *allocStackRegister();
-Stack         createStack();
-void          freeStack(Stack baseStack);
-void          pushStack(Stack baseStack, char x);
-char          popStack(Stack baseStack);
-
+/* pilhas de caracteres */
+stackRegister    *allocStackRegister();
+Stack            createStack();
+void             freeStack(Stack baseStack);
+void             pushStack(Stack baseStack, char x);
+char             popStack(Stack baseStack);
+/* pilha de inteiros */
+stackRegisterInt *allocStackRegisterInt();
+StackInt         reateStackInt();
+void             freeStackInt(StackInt baseStack);
+void             pushStackInt(StackInt baseStack, int i);
+int              popStackInt(StackInt  baseStack);
+void pushCharToNum(Stack stack, StackInt stackInt);
 /***
  * Funções de conversão infixa/posfixa
  */ 
-int           priority(char cell, char t);
-Stack         convertPostFix(char expr[]);
-Stack         invertStack(Stack stack);
+int              priority(char cell, char t);
+Stack            convertPostFix(char expr[]);
+Stack            invertStack(Stack stack);
+
+/***
+ * Funções de calculo
+ */ 
+int             calcPostFix(Stack stack);
 
 /***
  * Principal
@@ -46,7 +63,8 @@ int main(int argc, char const *argv[]) {
   char Linha[MAX];
   char *result;
   int iteration, numEntries;
-  Stack finalStack;
+  Stack finalStack, calcStack;
+  calcStack = createStack();
   finalStack = createStack();
 
   /***
@@ -73,9 +91,9 @@ int main(int argc, char const *argv[]) {
     /*caso a linha esteja OK*/
     if(result){
       finalStack = invertStack(convertPostFix(Linha));
-      
-      outputFileFeed(argv, finalStack);
-      
+      calcStack =  invertStack(convertPostFix(Linha));;
+      /*TODO: inserir o resultado do calcPostFixno outputFileFeed*/
+      outputFileFeed(argv, finalStack, calcPostFix(calcStack));
     }
   }
 
@@ -151,11 +169,13 @@ void outputFileCreate(char const *argv[], int numEntries){
   fclose(outFile);
 
 }
-void outputFileFeed(char const *argv[], Stack finalStack){
+void outputFileFeed(char const *argv[], Stack finalStack, int calcValue){
   
   char *outputFileName = (char *)calloc(1, sizeof(argv[1])+1);
   FILE *outFile;
+  char strCalcValue[MAX];
  
+  sprintf(strCalcValue, "%d", calcValue);
   strcpy(outputFileName, argv[1]);
   
   outputFileName[sizeof(argv[1])+1] = 'o';
@@ -166,8 +186,10 @@ void outputFileFeed(char const *argv[], Stack finalStack){
   while (finalStack->next != NULL){
     fputc(popStack(finalStack), outFile);
   }
-  fputs("; \n", outFile);
-    
+  fputs("; ", outFile);
+  fputs(strCalcValue, outFile);
+  fputs("\n", outFile);
+      
   fclose(outFile);
 
 }
@@ -231,6 +253,83 @@ char popStack(Stack baseStack){
  return x;
 }
 
+
+stackRegisterInt *allocStackRegisterInt(){
+ stackRegisterInt* q;
+ q = (stackRegisterInt*)calloc(1, sizeof(stackRegisterInt));
+ if(q==NULL)
+  exit(-1);
+ return q;
+}
+
+StackInt createStackInt(){
+ StackInt baseStack;
+ baseStack = allocStackRegisterInt();
+ baseStack->next = NULL;
+ return baseStack;
+}
+
+StackInt invertStackInt(StackInt stack) {
+  StackInt tempStack;
+  tempStack = allocStackRegisterInt();
+  tempStack->next = NULL;
+  while (stack->next != NULL) {
+    pushStackInt(tempStack, popStackInt(stack));
+  }
+  return tempStack;
+}
+
+void freeStackInt(StackInt baseStack){
+ stackRegisterInt *q,*t;
+ q = baseStack;
+ while(q!=NULL){
+ t = q;
+ q = q->next;
+ free(t);
+ }
+}
+
+void pushStackInt(StackInt baseStack, int i){
+ stackRegisterInt *q;
+ q = allocStackRegisterInt();
+ q->value = i;
+ q->next = baseStack->next;
+ baseStack->next = q;
+}
+
+int popStackInt(StackInt baseStack){
+ stackRegisterInt *q;
+ int i;
+ q = baseStack->next;
+ if(q==NULL)
+  exit(-1);
+ i = q->value;
+ baseStack->next = q->next;
+ free(q);
+ return i;
+}
+/***
+ * pega os valores numericos consecutivos,
+ * entre um intervalo de espaços
+ * e os insere numa pilha de inteiros
+ */ 
+void pushCharToNum(Stack stack, StackInt stackInt){
+  int num, i;
+  char tempChar, tempString[1];
+  num = i = 0;
+
+  tempChar = popStack(stack);
+  
+  while (isdigit(tempChar)) {
+    tempString[0] = tempChar;
+    tempString[1] = '\0';
+    num = (num * 10 ) + atoi(tempString);
+    tempChar = popStack(stack);
+    i++;
+  }
+  
+  pushStackInt(stackInt, num);
+}
 
 /***
  * Funções de conversão infixa / posfixa
@@ -339,4 +438,71 @@ Stack convertPostFix(char expr[]){
   }while(cell != '\0');
   freeStack(baseStack);
   return returnStack;
+}
+
+/***
+ * Calculamos através da posfixa
+ */ 
+int calcPostFix(Stack stack) {
+  StackInt       tempStackInt;
+  int            auxInt, num1, num2;
+  char           tempChar[MAX];
+
+
+  tempStackInt =  createStackInt();
+  auxInt = num1 = num2 = 0;
+
+  while(stack->next != NULL) {
+    /**
+     * tiro e coloco o elemento só pra testá-lo
+     * a real manipulação será feita dentro da função específica
+     * pensei em modularizar, mas preferi deixar assim mais didático
+     * para eu mesmo me lembrar da funcionalidade
+     */
+    tempChar[0] = popStack(stack);
+    pushStack(stack, tempChar[0]);
+    
+    /* coletamos os numeros
+     * e enviamos pra uma pilha própria
+     */
+    if(isdigit(tempChar[0])) {
+      pushCharToNum(stack, tempStackInt);
+      tempChar[0] = popStack(stack);
+      pushStack(stack, tempChar[0]);
+    } 
+    /* descartamos os espaços */
+    else if ((tempChar[0] == ' ')) {
+      popStack(stack);
+    } 
+    /* trabalhamos os operadores */
+    else {
+      num1 = popStackInt(tempStackInt);
+      num2 = popStackInt(tempStackInt);
+      tempChar[0] = popStack(stack);
+      
+      switch (tempChar[0]) {
+      case '+':
+        pushStackInt(tempStackInt, (num2+num1));
+        break;
+      case '-':
+        pushStackInt(tempStackInt, (num2-num1));
+        break;
+      case '*':
+        pushStackInt(tempStackInt, (num2*num1));
+        break;
+      case '/':
+        pushStackInt(tempStackInt, (num2/num1));
+        break;
+      case '^':
+        auxInt = num2;
+        while (num1-- > 1) {
+          auxInt *= num2;
+        }
+        pushStackInt(tempStackInt, auxInt);
+        break;
+      }
+    }  
+  }
+  num1 = popStackInt(tempStackInt);
+  return num1;
 }

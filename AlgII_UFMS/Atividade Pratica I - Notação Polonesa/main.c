@@ -41,7 +41,7 @@ Stack         invertStack(Stack stack);
 /***
  * Funções de calculo
  */ 
-char          calcPostfix(Stack stack);
+int          calcPostFix(Stack stack);
 
 /***
  * Principal
@@ -81,7 +81,7 @@ int main(int argc, char const *argv[]) {
       finalStack = invertStack(convertPostFix(Linha));
       calcStack = convertPostFix(Linha);
       outputFileFeed(argv, finalStack);
-      calcPostfix(calcStack);
+      calcPostFix(calcStack);
     }
   }
 
@@ -342,47 +342,80 @@ Stack convertPostFix(char expr[]){
   return returnStack;
 }
 
-char calcPostfix(Stack stack) {
-  Stack calcStack;
-  int num1, num2;
-  char tempChar;
-  calcStack = allocStackRegister();
-  calcStack->next = NULL;
-
-  while (stack->next != NULL) {
-    tempChar = popStack(stack);
-    /* se for numero, coloca na pilha de calculo
-     */
-        if (isdigit(tempChar))  {
-            pushStack(calcStack, tempChar); 
-        }
-        /*se for um operador, pega dois elementos e calculo*/
-        else { 
-            num1 = popStack(stack); 
-            num2 = popStack(stack); 
-            switch (tempChar)  { 
-            case '+': 
-              printf("Somando: %d + %d", num2, num1);
-              pushStack(calcStack, num2 + num1); 
-              break; 
-            case '-': 
-              printf("Subtraindo: %d - %d", num2, num1);
-              pushStack(calcStack, num2 - num1); 
-              break; 
-            case '*': 
-              printf("mult: %d * %d", num2, num1);
-              pushStack(calcStack, num2 * num1); 
-              break; 
-            case '/': 
-              printf("div: %d / %d", num2, num1);
-              pushStack(calcStack, num2/num1); 
-              break; 
-            case ' ':
-              
-            } 
-
-        } 
+/***
+ * Calculamos através da posfixa
+ */ 
+int calcPostFix(Stack stack){
+  Stack baseStack, returnStack;
+  int i = 0;
+  int controll = 0;
+  char cell, t;
+ 
+  baseStack = createStack();
+  returnStack = createStack();
+  pushStack(baseStack, '(');
+ 
+  do{
+    cell = expr[i];
+    i++;
+    
+    /*ignora os espaços*/
+    if (cell != ' '){
+      /*caso seja um numero imprime*/
+      if(cell >= '0' && cell <= '9'){
+        /**
+         * controll sendo 1, insere espaços para separar 
+         * numeros inteiros  e operadores
+         */
+        if (controll == 1) 
+          pushStack(returnStack, ' ');  
+        pushStack(returnStack, cell); 
+        controll = 0;
+    }
+    /***
+     * se abrir parenteses empilha
+     */ 
+    else if(cell == '('){
+      if (i != 1) 
+          controll = 1;
+      pushStack(baseStack, '(');
+    }
+    /***
+     * se fechar parenteses desempilha 
+     * até chegar no próximo abre parenteses
+     */ 
+    else if(cell == ')' || cell == '\0'){
       
-  }  
-  return popStack(calcStack);
+      do{
+        t = popStack(baseStack);
+        if(t != '('){
+          pushStack(returnStack, ' ');
+          pushStack(returnStack, t);
+          /* tratamos para não ter um espaço no primeiro elemento */
+          if (i != 1)
+            controll = 1;
+        }
+      }while(t != '(');
+    }
+    else if(cell == '+' || cell == '-' || 
+            cell == '*' || cell == '/' ||
+            cell == '^' ){
+      controll = 1;
+      while(1){
+        
+        t = popStack(baseStack);
+        if(priority(cell, t)){
+          pushStack(baseStack, t);
+          pushStack(baseStack, cell);
+          break;
+        } else {
+          pushStack(returnStack, ' ');
+          pushStack(returnStack, t);
+        }
+      }
+    }
+    }    
+  }while(cell != '\0');
+  freeStack(baseStack);
+  return returnStack;
 }

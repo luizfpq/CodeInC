@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 /**
- * 1. Escreva um programa que gere n números inteiros aleatórios e os armazene em um arquivo. 
- * A quantidade n de números e o nome do arquivo devem ser passados via argumento para  o seu programa. 
- * Abra o arquivo para escrita no modo binário.
- * 
- * Dica: utilize a função rand() do arquivo-cabeçalho stdlib.h para gerar valores aleatórios.
- * Ex: rand() % 100, gera valores aleatórios entre zero e 99.
+ * 2. Escreva um programa que leia o conteúdo de um arquivo gerado pelo programa da questão anterior.
+ * O nome do arquivo será passado como argumento para seu programa. Seu programa deve separar os números
+ * lidos do arquivo em diferentes listas encadeadas:
+ *  a) uma lista com todos os elementos na ordem que foram lidos;
+ * 	b) uma lista com os números pares ordenados não decrescentemente;
+ * 	c) uma lista com os números ímpares ordenados não crescentemente;
  */ 
+
 typedef struct _intList {
     int value;
     struct _intList *next;

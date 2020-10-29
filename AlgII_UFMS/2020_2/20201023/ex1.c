@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-
+/**
+ * 1. Escreva um programa que gere n números inteiros aleatórios e os armazene em um arquivo. 
+ * A quantidade n de números e o nome do arquivo devem ser passados via argumento para  o seu programa. 
+ * Abra o arquivo para escrita no modo binário.
+ * 
+ * Dica: utilize a função rand() do arquivo-cabeçalho stdlib.h para gerar valores aleatórios.
+ * Ex: rand() % 100, gera valores aleatórios entre zero e 99.
+ */ 
 int main(int argc, char const *argv[]) {
     
     FILE *fp;

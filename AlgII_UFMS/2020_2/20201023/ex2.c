@@ -8,6 +8,13 @@
  *  a) uma lista com todos os elementos na ordem que foram lidos;
  * 	b) uma lista com os números pares ordenados não decrescentemente;
  * 	c) uma lista com os números ímpares ordenados não crescentemente;
+ *  
+ * Gere funções recursivas para:
+ *   - encontrar o maior valor em uma lista;
+ *   - encontrar o menor valor em uma lista;
+ *   - contar quantos números iguais a x existem em uma lista;
+ *   - calcular o tamanho de uma lista;
+ * 
  */ 
 
 typedef struct _intList {
@@ -19,7 +26,15 @@ typedef intList *List;
 void addMainList(intList **mainList, int value);    /* adiciona na lista principal por ordem de leitura */
 void addOddList(intList **oddList, int value);      /* adiciona na lista impar não decrescente */
 void addPairList(intList **pairList, int value);    /* adiciona na lista par não crescente */
-void imprime_lista(intList *lst);
+void printList(intList *lst);                       /* imprime lista */
+void freeList(intList *lst);                        /* libera lista da memória */
+
+/*funcoes recursivas*/
+int  findMax(int x, intList *lst);                  /* busca o maior valor na lista principal */             
+int  findMin(int x, intList *lst);                  /* busca o menor valor na lista principal */             
+int countSize(intList *lst);                        /* conta elementos da lista */
+int countItem(int item, intList *lst);              /* conta repetição de um elementos da lista */
+
 
 int main( int argc, char** argv ){
 
@@ -50,15 +65,27 @@ int main( int argc, char** argv ){
                 addOddList(&oddList, value);
             
         }
+
+        printf("findMax: %d\n", findMax(mainList->value, mainList)); /* x é o primeiro elemento da lista, só para controle */
+        printf("findMin: %d\n", findMin(mainList->value, mainList)); /* x é o primeiro elemento da lista, só para controle */
+        printf("countSize: %d\n", countSize(mainList));
+        printf("countItem: %d\n", countItem(10, mainList)); /*especifique o elemento a ser buscado*/
+        
         /* fecha o arquivo */
         fclose(fp);
 
         printf("\nLista principal: ");
-        imprime_lista(mainList);
+        printList(mainList);
+        freeList(mainList);
+
         printf("\nLista impar não decrescente: ");
-        imprime_lista(oddList);
+        printList(oddList);
+        freeList(oddList);
+        
         printf("\nLista par não crescente: ");
-        imprime_lista(pairList);
+        printList(pairList);
+        freeList(pairList);
+        
         printf("\n");
     }
 
@@ -194,8 +221,49 @@ void addPairList(intList **pairList, int value) {
     }
 }
 
-void imprime_lista(intList *lst) {
+void printList(intList *lst) {
     intList *p;
     for (p = lst; p != NULL; p = p->next)
         printf("%d ", p->value);
+}
+
+int findMax(int x, intList *lst) {
+    if (lst == NULL)
+        return x;
+    if (lst->value > x)
+        x = lst->value;
+    return findMax(x, lst->next);
+}
+
+int findMin(int x, intList *lst) {
+    if (lst == NULL)
+        return x;
+    if (lst->value < x)
+        x = lst->value;
+    return findMin(x, lst->next);
+}
+
+int countSize(intList *lst) {
+    if (lst == NULL)
+        return 0;
+    return 1 + countSize(lst->next);
+}
+
+int countItem(int item, intList *lst) {
+    if (lst == NULL)
+        return 0;
+    else if (item == lst->value)
+        return 1 + countItem(item, lst->next);
+    else 
+        return countItem(item, lst->next);
+}
+
+void freeList(intList *lst) {
+    intList *next;
+    while (lst != NULL) {
+        next = lst->next;
+        free(lst);
+        lst = next;
+    }
+    free(next);
 }

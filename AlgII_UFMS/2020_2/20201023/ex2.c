@@ -30,8 +30,8 @@ void printList(intList *lst);                       /* imprime lista */
 void freeList(intList *lst);                        /* libera lista da memória */
 
 /*funcoes recursivas*/
-int  findMax(int x, intList *lst);                  /* busca o maior valor na lista principal */             
-int  findMin(int x, intList *lst);                  /* busca o menor valor na lista principal */             
+int  findMax(intList *lst);                  /* busca o maior valor na lista principal */             
+int  findMin(intList *lst);                  /* busca o menor valor na lista principal */             
 int countSize(intList *lst);                        /* conta elementos da lista */
 int countItem(int item, intList *lst);              /* conta repetição de um elementos da lista */
 
@@ -66,10 +66,10 @@ int main( int argc, char** argv ){
             
         }
 
-        printf("findMax: %d\n", findMax(mainList->value, mainList)); /* x é o primeiro elemento da lista, só para controle */
-        printf("findMin: %d\n", findMin(mainList->value, mainList)); /* x é o primeiro elemento da lista, só para controle */
+        printf("findMax: %d\n", findMax(mainList)); /* x é o primeiro elemento da lista, só para controle */
+        printf("findMin: %d\n", findMin(mainList)); /* x é o primeiro elemento da lista, só para controle */
         printf("countSize: %d\n", countSize(mainList));
-        printf("countItem: %d\n", countItem(10, mainList)); /*especifique o elemento a ser buscado*/
+        printf("countItem: %d\n", countItem(77, mainList)); /*especifique o elemento a ser buscado*/
         
         /* fecha o arquivo */
         fclose(fp);
@@ -168,57 +168,47 @@ void addOddList(intList **oddList, int value) {
     intList *p, *q, *nova;
     p = NULL; 
     q = *oddList;
+    /* percorremos a lista buscando o local de inserção */
     while (q != NULL && q->value <= value) {
         p = q; /*guarda o ultimo item da lista*/
         q = q->next;
     }
-    if(q == NULL){ /*se atingirmos o fim da lista, insere no fim*/
-        nova = (intList *) malloc(sizeof (intList));
-        nova->value = value;
+    /* alocamos memória e criamos a nova célula */
+    nova = (intList *) malloc(sizeof (intList));
+    nova->value = value;
+    
+    if(q == NULL) /* se atingirmos o fim da lista, próximo é nulo */    
         nova->next = NULL;
-        if(p!=NULL)
-            p->next=nova;
-        else
-            *oddList=nova;
-    }
-    else {
-        nova = (intList *) malloc(sizeof (intList));
-        nova->value = value;
+    else /* senão, próximo é um item da lista*/
         nova->next = q;
-        if(p!=NULL)
-            p->next=nova;
-        else
+
+    if(p == NULL) /* se estivermos na primeira posição da lista */
             *oddList=nova;
-    }
+        else /* se estivermos no meio da lista */
+            p->next=nova;
 }
 
 void addPairList(intList **pairList, int value) {
     intList *p, *q, *nova;
     p = NULL; q = *pairList;
+    /* percorremos a lista buscando o local de inserção */
     while (q != NULL && q->value >= value) {
         p = q; /*guarda o ultimo item da lista*/
         q = q->next;
     }
-    if(q == NULL){ /*se atingirmos o fim da lista, insere no fim*/
-        
-        nova = (intList *) malloc(sizeof (intList));
-        nova->value = value;
+    /* alocamos memória e criamos a nova célula */
+    nova = (intList *) malloc(sizeof (intList));
+    nova->value = value;
+    
+    if(q == NULL) /* se atingirmos o fim da lista, próximo é nulo */    
         nova->next = NULL;
-        
-        if(p!=NULL)
-            p->next=nova;
-        else
-            *pairList=nova;
-    }
-    else {
-        nova = (intList *) malloc(sizeof (intList));
-        nova->value = value;
+    else /* senão, próximo é um item da lista*/
         nova->next = q;
-        if(p!=NULL)
-            p->next=nova;
-        else
+
+    if(p == NULL) /* se estivermos na primeira posição da lista */
             *pairList=nova;
-    }
+        else /* se estivermos no meio da lista */
+            p->next=nova;
 }
 
 void printList(intList *lst) {
@@ -227,20 +217,26 @@ void printList(intList *lst) {
         printf("%d ", p->value);
 }
 
-int findMax(int x, intList *lst) {
-    if (lst == NULL)
-        return x;
-    if (lst->value > x)
-        x = lst->value;
-    return findMax(x, lst->next);
+int findMin(intList *lst) {
+    int menor;
+    if (lst->next == NULL)
+        return lst->value;
+    menor = findMin(lst->next);
+    if (lst->value < menor)    
+        return lst->value;
+    else
+        return menor;
 }
 
-int findMin(int x, intList *lst) {
-    if (lst == NULL)
-        return x;
-    if (lst->value < x)
-        x = lst->value;
-    return findMin(x, lst->next);
+int findMax(intList *lst) {
+    int maior;
+    if (lst->next == NULL)
+        return lst->value;
+    maior = findMax(lst->next);
+    if (lst->value > maior)    
+        return lst->value;
+    else
+        return maior;
 }
 
 int countSize(intList *lst) {

@@ -22,7 +22,7 @@ typedef struct _stackRegister{
  char data;
  struct _stackRegister *next;
 } stackRegister;
-typedef stackRegister* Stack;
+typedef stackRegister *Stack;
 /***
  * cria uma struct para manipular os inteiros
  * lembrando que como lemos char por char

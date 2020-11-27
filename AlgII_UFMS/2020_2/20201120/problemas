@@ -1,0 +1,34 @@
+20/11/2020 - Ordenação
+1 - Crie um arquivo-fonte que implemente as funções prototipadas no arquivo-cabeçalho vetor.h
+
+2 - Crie um programa que receba um valor n via argumento de programa. Seu programa deve gerar vários arquivos de saída, cada um com n números distintos, com os seguintes critérios:
+      - ordenados de 1 a n
+      - ordenados de n a 1
+      - embaralhados com 5% de trocas (% em cima do valor de n)
+      - embaralhados com 25% de trocas (% em cima do valor de n)
+      - embaralhados com 50% de trocas (% em cima do valor de n)
+      - embaralhados com 75% de trocas (% em cima do valor de n)
+      - embaralhados com 90% de trocas (% em cima do valor de n)
+
+
+
+3 - Crie um arquivo-cabeçalho e um arquivo-fonte com a implementação dos algoritmos de ordenação estudados em sala.
+
+
+
+4 - Escreva um programa que receba o nome de um algoritmo de ordenação (item 3) e o nome de um arquivo gerado no item 2, via argumento de programa. Seu programa deve executar o algoritmo informado sobre os valores no arquivo. Ao final, seu programa deve verificar se o vetor está ordenado e informar o tempo gasto para realizar a ordenação.
+
+Supondo que o nome do programa seja ordena, temos:
+
+$ ./ordena selection_sort crescente250000.txt
+
+A saída deve ser:
+SUCESSO: "Ordenado em xx segundos."
+   OU
+FALHA: "Não ordenado em xx segundos."
+
+OBS: talvez seja necessário criar mais algumas funções em vetor.c para lidar com essa nova entrada.
+
+
+
+5 - Faça uma comparação entre a eficiência dos algoritmos de acordo com as entradas. Por exemplo, considerando um vetor (grande) de números ordenados, qual algoritmo é mais rápido? Discutiremos sobre isso na próxima aula.

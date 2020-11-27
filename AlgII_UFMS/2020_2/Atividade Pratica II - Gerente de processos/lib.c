@@ -2,29 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-/**
- * char     acao[]          tipo de ação a executar
- * char     descricao[]     descricao do processo
- * char     opt[]           opção (-p|-t), para prox, exec, change, print
- * int      pri             prioridade do processo para add
- * int      ant             processo anterior, para modificação de prioridade
- * int      nov             processo novo, para modificação de prioridade
- * int      hh              hora
- * int      hha             hora da anterior, para modificação de prioridade
- * int      hhn             hora da nova, para modificação de prioridade
- * int      mm              minutos
- * int      mma             minutos da anterior, para modificação de prioridade
- * int      mmn             minutos da nova, para modificação de prioridade
- * int      ss               segundos
- * int      ssa             segundos da anterior, para modificação de prioridade
- * int      ssn             segundos da nova, para modificação de prioridade
- */
-
 /**
  * Armazena horário de chegada
 */
-typedef struct 
+typedef struct
 {
     int hh;
     int mm;
@@ -35,144 +16,240 @@ typedef struct
 typedef struct _celula
 {
     int prior;
-    /*preferimos usar como ponteiros pra 
-    facilitar a alocação e manipulação*/
-    horario *chegada;
+    horario chegada;
     char descricao[50];
     struct _celula *prox;
 } celula;
+
 /**
- * define um tipo de ponteiro pra celula, 
- * pra usar de maneira mais simplificada os ponteiros
- * */
-typedef celula *Lista;
-
-/***
- * Funções de manipulação de lista
- */ 
-celula *alocaCelula()
+ * cria um timestamp pra facilitar o calculo de diferença de horas
+ */
+int timestamp(int hh, int mm, int ss)
 {
- celula* q;
- q = (celula*) malloc(sizeof(celula));
- if(q==NULL)
-  exit(-1);
- return q;
+    hh = hh * 3600;
+    mm = mm * 60;
+
+    return hh + mm + ss;
 }
 
-horario *alocaHorario()
+/**
+ * adiciona numa lista de prioridades pela prioridade
+ */
+void add_p(celula **Lista_prior, int pri, int hh, int mm, int ss, char *descricao)
 {
- horario *q;
- q = (horario*) malloc(sizeof(horario));
- if(q==NULL)
-  exit(-1);
- return q;
-}
+    celula *p, *q, *novo;
 
-Lista createLista()
-{
- Lista listaProcessos;
- listaProcessos = alocaCelula();
- listaProcessos->prox = NULL;
- return listaProcessos;
-}
+    p = NULL;
+    q = *Lista_prior;
 
-void add(Lista listaProcessos, int pri, int hh, int mm, int ss, char *descricao)
-{
- celula *q; 
- horario *h;
-
- q = alocaCelula();
- h = alocaHorario();
-
- q->prior = pri;
- /*manipula o horario*/
- h->hh = hh;
- h->mm = mm;
- h->ss = ss;
- q->chegada = h;
- strcpy(q->descricao, descricao);
- q->prox = listaProcessos->prox;
- listaProcessos->prox = q;
- printf ("- %d\n", q->prior);
-}
-
-
-void exec(Lista listaProcessos){
- celula *q,*t;
- q = listaProcessos;
- while(q!=NULL){
- t = q;
- q = q->prox;
- free(t);
- }
-}
-
-void next(Lista listaProcessos) {
-   if (listaProcessos != NULL) {
-      printf ("- %d\n", listaProcessos->prior);
-      next (listaProcessos->prox);
-   }
-}
-
-/*Manipula as ações dos comandos*/
-void get_command()
-{
-    Lista listaProcessos;
-    char acao[6], opt[2], descricao[50];
-    int pri, ant, nov, hh, hha, hhn, mm, mma, mmn, ss, ssa, ssn;
-
-    listaProcessos = createLista();
-
-    scanf("%s", acao);
-    
-    if (strcmp(acao, "add") == 0)
+    /*anda na celula até o final, ou até encontrar o elemento seguinte ao que deseja inserir*/
+    while (q != NULL && q->prior > pri)
     {
-        scanf("%d %d:%d:%d %s", &pri, &hh, &mm, &ss, descricao);
-        add(listaProcessos, pri, hh, mm, ss, descricao);
-    } 
-    else if (strcmp(acao, "exec") == 0)
-    {
-        scanf("%s", opt);
+        p = q;
+        q = q->prox;
     }
-    else if (strcmp(acao, "next") == 0)
+    /*cria uma nova celula para a celula e atribui valor a ela*/
+    novo = (celula *)malloc(sizeof(celula));
+    novo->prior = pri;
+    novo->chegada.hh = hh;
+    novo->chegada.mm = mm;
+    novo->chegada.ss = ss;
+    strcpy(novo->descricao, descricao);
+    /* confirma se está inserindo no final, se tiver o novo->prox aponta pra nulo, 
+    senão, aponta pro item imediatamente seguinte a ele, sendo assim inserimos ordenadamente */
+    if (q == NULL)
+        novo->prox = NULL;
+    else
+        novo->prox = q;
+    /*verifica se está no começo da celula, se estiver indica o novo item como primeiro na "cabeça" da celula
+    são estiver, o p->prox aponta pro item novo*/
+    if (p != NULL)
+        p->prox = novo;
+    else
+        *Lista_prior = novo;
+}
+/**
+ * adiciona numa lista de prioridades pela horario
+ */
+void add_t(celula **Lista_temp, int pri, int hh, int mm, int ss, char *descricao)
+{
+    celula *p, *q, *novo;
+
+    p = NULL;
+    q = *Lista_temp;
+
+    /*anda na celula até o final, ou até encontrar o elemento seguinte ao que deseja inserir*/
+    while (q != NULL && (timestamp(hh, mm, ss) > timestamp(q->chegada.hh, q->chegada.mm, q->chegada.ss)))
     {
-        printf("listando essas bosta\n");
-        next(listaProcessos);
+        p = q;
+        q = q->prox;
     }
-    /*mostra um processo de acordo com a opção*/
-    else if (strcmp(acao, "prox") == 0)
+    /*cria uma nova celula para a celula e atribui valor a ela*/
+    novo = (celula *)malloc(sizeof(celula));
+    novo->prior = pri;
+    novo->chegada.hh = hh;
+    novo->chegada.mm = mm;
+    novo->chegada.ss = ss;
+    strcpy(novo->descricao, descricao);
+    /* confirma se está inserindo no final, se tiver o novo->prox aponta pra nulo, 
+    senão, aponta pro item imediatamente seguinte a ele, sendo assim inserimos ordenadamente */
+    if (q == NULL)
+        novo->prox = NULL;
+    else
+        novo->prox = q;
+    /*verifica se está no começo da celula, se estiver indica o novo item como primeiro na "cabeça" da celula
+    são estiver, o p->prox aponta pro item novo*/
+    if (p != NULL)
+        p->prox = novo;
+    else
+        *Lista_temp = novo;
+}
+/**
+ * executa o processo de prioridade mais alta
+ */
+void exec_p(celula **Lista_prior)
+{
+    celula *q;
+
+    q = *Lista_prior;
+    *Lista_prior = q->prox;
+    free(q);
+}
+void exec_t(celula **Lista_temp)
+{
+    celula *q;
+
+    q = *Lista_temp;
+    *Lista_temp = q->prox;
+    free(q);
+}
+/**
+ * exibe o processo de prioridade mais alta
+ */
+void next_p(celula *Lista_prior)
+{
+    printf("%02d %02d:%02d:%02d %s\n", Lista_prior->prior, Lista_prior->chegada.hh, Lista_prior->chegada.mm, Lista_prior->chegada.ss, Lista_prior->descricao);
+    printf("\n");
+}
+void next_t(celula *Lista_temp)
+{
+    printf("%02d %02d:%02d:%02d %s\n", Lista_temp->prior, Lista_temp->chegada.hh, Lista_temp->chegada.mm, Lista_temp->chegada.ss, Lista_temp->descricao);
+    printf("\n");
+}
+
+/**
+ * lista todos os processos por prioridade
+ */
+void print_p(celula *Lista_prior)
+{
+    celula *temp;
+    for (temp = Lista_prior; temp != NULL; temp = temp->prox)
+        printf("%02d %02d:%02d:%02d %s\n", temp->prior, temp->chegada.hh, temp->chegada.mm, temp->chegada.ss, temp->descricao);
+    printf("\n");
+    free(temp);
+}
+
+void print_t(celula *Lista_temp)
+{
+    celula *temp;
+    for (temp = Lista_temp; temp != NULL; temp = temp->prox)
+        printf("%02d %02d:%02d:%02d %s\n", temp->prior, temp->chegada.hh, temp->chegada.mm, temp->chegada.ss, temp->descricao);
+    printf("\n");
+    free(temp);
+}
+
+void change_p(celula **Lista_prior, int ant, int nov)
+{
+    celula *a, *n, *p, *q;
+    a = NULL;
+    n = NULL;
+
+    q = *Lista_prior;
+
+    /*anda na celula até o final, ou até encontrar o elemento seguinte ao que deseja inserir*/
+    while (q->prox != NULL && (a == NULL || n == NULL))
     {
-        scanf("%s", opt);
-        /*exibe pela prioridade*/
-        if(strcmp(opt, "-p") == 0)
+        /*essa estrutura foi estritamente pensada para o caso da anterior
+        ser sempre menor que a nova, visto que o enunciado pede que ela aumente a prioridade*/
+        if (q->prox->prior == ant)
         {
-            scanf("%d|%d", &ant, &nov);
+            if (p == NULL)
+                a = q->prox;
+            else
+                a = q;
         }
-        /*exibe pelo horário*/
-        else if(strcmp(opt, "-t") == 0)
+        if (q->prior == nov)
         {
-            scanf("%d:%d:%d|%d:%d:%d", &hha,&mma,&ssa,&hhn,&mmn,&ssn);
+            if (p == NULL)
+                n = q->prox;
+            else
+                n = q;
         }
+        /*usamos p apenas para controlarmos o caso onde o item 
+        esteja no primeiro elemento*/
+        p = q;
+        q = q->prox;
     }
-    /*altera a prioridade de uma ação*/
-    else if (strcmp(acao, "change") == 0)
+
+    /**
+     * verifica se não existe algum valor equivalente ao novo valor
+     */
+    if (a != NULL && n == NULL)
     {
-        scanf("%s ", opt);
-        /*altera pela prioridade*/
-        if(strcmp(opt, "-p") == 0)
-        {
-            scanf("%d|%d", &ant, &nov);
-        }
-        /*altera pelo horário*/
-        else if(strcmp(opt, "-t") == 0)
-        {
-            scanf("%d:%d:%d|%d:%d:%d", &hha,&mma,&ssa,&hhn,&mmn,&ssn);
-        }
+
+        /*adiciono na nova posição*/
+        add_p(Lista_prior, nov, a->prox->chegada.hh, a->prox->chegada.mm, a->prox->chegada.ss, a->prox->descricao);
+
+        /**
+         *  removo o item
+         * TODO: verificar eficiencia
+         */
+        a->prox = a->prox->prox;
     }
-    /*finaliza o sistema*/
-    else if (strcmp(acao, "quit") == 0)
-    {   
-        exit(0);
+}
+
+void change_t(celula **Lista_temp, int hha, int mma, int ssa, int hhn, int mmn, int ssn)
+{
+    celula *a, *n, *p, *q;
+    a = NULL;
+    n = NULL;
+
+    q = *Lista_temp;
+
+    /*anda na celula até o final, ou até encontrar o elemento seguinte ao que deseja inserir*/
+    while (q->prox != NULL && (a == NULL || n == NULL))
+    {
+        if (timestamp(q->chegada.hh, q->chegada.mm, q->chegada.ss) == timestamp(hha, mma, ssa))
+        {
+            if (p == NULL)
+                a = q->prox;
+            else
+                a = q;
+        }
+        if (timestamp(q->prox->chegada.hh, q->prox->chegada.mm, q->prox->chegada.ss) == timestamp(hhn, mmn, ssn))
+        {
+            if (p == NULL)
+                n = q->prox;
+            else
+                n = q;
+        }
+        /*usamos p apenas para controlarmos o caso onde o item 
+        esteja no primeiro elemento*/
+        p = q;
+        q = q->prox;
     }
-    get_command();
+
+    /**
+     * verifica se não existe algum valor equivalente ao novo valor 
+     */
+    if (a != NULL && n == NULL)
+    {
+        /*adiciono na nova posição*/
+        add_t(Lista_temp, a->prior, hhn, mmn, ssn, a->descricao);
+        /**
+         *  removo o item
+         * TODO: verificar eficiencia
+         */
+        a->prox = a->prox->prox;
+    }
 }

@@ -3,7 +3,7 @@
  * preferimos não usar esta estrutura extra para facilitar a manipulação dos dados
  * e evitar transações de alocação extra
 */
-typedef struct 
+typedef struct
 {
     int hh;
     int mm;
@@ -18,16 +18,18 @@ typedef struct _celula
     char descricao[50];
     struct _celula *prox;
 } celula;
-/**
- * define um tipo de ponteiro pra celula, 
- * pra usar de maneira mais simplificada os ponteiros
- * */
-typedef celula *Lista;
 
-celula *alocaCelula();
-horario *alocaHorario();
-Lista createLista();
-void exec(Lista listaProcessos);
-void next(Lista listaProcessos);
-void add(Lista listaProcessos, int pri, int hh, int mm, int ss, char *descricao);
-void get_command();
+void add_p(celula **Lista_prior, int pri, int hh, int mm, int ss, char *descricao);
+void change_p(celula **Lista_prior, int ant, int nov);
+void exec_p(celula **Lista_prior);
+void next_p(celula *Lista_prior);
+void print_p(celula *Lista_prior);
+
+void add_t(celula **Lista_temp, int pri, int hh, int mm, int ss, char *descricao);
+void change_t(celula **Lista_temp, int hha, int mma, int ssa, int hhn, int mmn, int ssn);
+void exec_t(celula **Lista_temp);
+void next_t(celula *Lista_temp);
+void print_t(celula *Lista_temp);
+
+/*cria um stimestamp para deixar o horario comparável*/
+int timestamp(int hh, int mm, int ss);

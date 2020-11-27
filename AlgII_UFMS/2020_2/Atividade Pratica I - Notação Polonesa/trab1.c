@@ -150,7 +150,6 @@ int main(int argc, char const *argv[])
       /* pilhas que serão manipuladas para calculo e exibição*/
       finalStack = invertStack(convertPostFix(Linha));
       calcStack = invertStack(convertPostFix(Linha));
-      ;
 
       outputFileFeed(argv, finalStack, calcPostFix(calcStack));
     }

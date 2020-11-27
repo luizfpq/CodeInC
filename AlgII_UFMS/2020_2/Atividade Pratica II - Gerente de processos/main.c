@@ -49,8 +49,12 @@ int main(int argc, char const *argv[])
         if (strcmp(acao, "add") == 0)
         {
             scanf("%d %d:%d:%d %s", &pri, &hh, &mm, &ss, descricao);
-            add_p(&Lista_prior, pri, hh, mm, ss, descricao);
-            add_t(&Lista_temp, pri, hh, mm, ss, descricao);
+            /*mantemos a consistencia dos valores pedidos no enunciado*/
+            if (pri >= 1 && pri <= 99)
+            {
+                add_p(&Lista_prior, pri, hh, mm, ss, descricao);
+                add_t(&Lista_temp, pri, hh, mm, ss, descricao);
+            }
         }
         /*mostra processo de acordo com a opção*/
         else if (strcmp(acao, "exec") == 0)

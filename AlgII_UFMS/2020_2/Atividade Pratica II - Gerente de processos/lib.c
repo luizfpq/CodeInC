@@ -193,6 +193,7 @@ void change_p(celula **Lista_prior, int ant, int nov)
 
     /**
      * verifica se não existe algum valor equivalente ao novo valor
+     * buscando manter a distinção da prioridade
      */
     if (a != NULL && n == NULL)
     {
@@ -241,6 +242,7 @@ void change_t(celula **Lista_temp, int hha, int mma, int ssa, int hhn, int mmn, 
 
     /**
      * verifica se não existe algum valor equivalente ao novo valor 
+     * buscando manter a distinção dos horários
      */
     if (a != NULL && n == NULL)
     {

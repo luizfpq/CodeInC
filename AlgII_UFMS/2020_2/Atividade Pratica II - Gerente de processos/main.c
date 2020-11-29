@@ -60,18 +60,18 @@ int main(int argc, char const *argv[])
         else if (strcmp(acao, "exec") == 0)
         {
             scanf("%s", opt);
-            if (strcmp(opt, "-p") == 0)
+            if ((strcmp(opt, "-p") == 0) && (Lista_prior != NULL))
                 exec_p(&Lista_prior);
-            else if (strcmp(opt, "-t") == 0)
+            else if ((strcmp(opt, "-t") == 0) && (Lista_temp != NULL))
                 exec_t(&Lista_temp);
         }
         /*mostra processo de acordo com a opção*/
         else if (strcmp(acao, "next") == 0)
         {
             scanf("%s", opt);
-            if (strcmp(opt, "-p") == 0)
+            if ((strcmp(opt, "-p") == 0) && (Lista_prior != NULL))
                 next_p(Lista_prior);
-            else if (strcmp(opt, "-t") == 0)
+            else if ((strcmp(opt, "-t") == 0)&& (Lista_temp != NULL))
                 next_t(Lista_temp);
         }
         /*mostra processo de acordo com a opção*/
@@ -81,22 +81,22 @@ int main(int argc, char const *argv[])
             if (strcmp(opt, "-p") == 0)
             {
                 scanf("%d|%d", &ant, &nov);
-                /*printf("%s a:%d n:%d\n", opt, ant, nov);*/
-                change_p(&Lista_prior, ant, nov);
+                if (Lista_prior != NULL)
+                    change_p(&Lista_prior, ant, nov);
             }
             else if (strcmp(opt, "-t") == 0)
             {
                 scanf("%d:%d:%d|%d:%d:%d", &hha, &mma, &ssa, &hhn, &mmn, &ssn);
-                /*printf("%s a:%d:%d:%d n:%d:%d:%d\n", opt, hha, mma, ssa, hhn, mmn, ssn);*/
-                change_t(&Lista_temp, hha, mma, ssa, hhn, mmn, ssn);
+                if (Lista_temp != NULL)
+                    change_t(&Lista_temp, hha, mma, ssa, hhn, mmn, ssn);
             }
         }
         else if (strcmp(acao, "print") == 0)
         {
             scanf("%s", opt);
-            if (strcmp(opt, "-p") == 0)
+            if ((strcmp(opt, "-p") == 0) && (Lista_prior != NULL))
                 print_p(Lista_prior);
-            else if (strcmp(opt, "-t") == 0)
+            else if ((strcmp(opt, "-t") == 0) && (Lista_temp != NULL))
                 print_t(Lista_temp);
         }
         scanf("%s", acao);

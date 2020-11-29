@@ -186,7 +186,7 @@ void change_p(celula **Lista_prior, int ant, int nov)
                 n = q;
         }
         /*usamos p apenas para controlarmos o caso onde o item 
-        esteja no primeiro elemento*/
+            esteja no primeiro elemento*/
         p = q;
         q = q->prox;
     }
@@ -217,7 +217,8 @@ void change_t(celula **Lista_temp, int hha, int mma, int ssa, int hhn, int mmn, 
 
     q = *Lista_temp;
 
-    /*anda na celula até o final, ou até encontrar o elemento seguinte ao que deseja inserir*/
+    /*essa estrutura foi estritamente pensada para o caso da anterior
+        ser sempre maior que a nova, visto que o enunciado pede que ela aumente a prioridade*/
     while (q->prox != NULL && (a == NULL || n == NULL))
     {
         if (timestamp(q->chegada.hh, q->chegada.mm, q->chegada.ss) == timestamp(hha, mma, ssa))
@@ -235,21 +236,21 @@ void change_t(celula **Lista_temp, int hha, int mma, int ssa, int hhn, int mmn, 
                 n = q;
         }
         /*usamos p apenas para controlarmos o caso onde o item 
-        esteja no primeiro elemento*/
+            esteja no primeiro elemento*/
         p = q;
         q = q->prox;
     }
 
     /**
-     * verifica se não existe algum valor equivalente ao novo valor 
-     * buscando manter a distinção dos horários
-     */
+         * verifica se não existe algum valor equivalente ao novo valor 
+         * buscando manter a distinção dos horários
+         */
     if (a != NULL && n == NULL)
     {
         /*adiciono na nova posição*/
         add_t(Lista_temp, a->prior, hhn, mmn, ssn, a->descricao);
         /**
-         *  removo o item
+         *  remove o item
          * TODO: verificar eficiencia
          */
         a->prox = a->prox->prox;

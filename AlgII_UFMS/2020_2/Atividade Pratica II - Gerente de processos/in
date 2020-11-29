@@ -1,0 +1,37 @@
+
+exec -p
+exec -t
+change -t 06:21:59|02:22:19
+change -p 6|10
+add 9 11:05:41 firefox
+add 14 06:15:02 openoffice
+add 5 05:26:18 xterm
+add 7 10:44:34 emacs
+add 16 05:43:21 gdb
+change -t 06:21:59|02:22:19
+next -p
+next -t
+exec -p
+exec -p
+change -t 06:21:59|02:22:19
+change -p 6|10
+exec -t
+
+print -t
+add 9 11:05:41 firefox
+
+
+add 14 06:15:02 openoffice
+add 5 05:26:18 xterm
+add 7 10:44:34 emacs
+add 16 05:43:21 gdb
+add 11 22:47:56 garbage-collector
+add 8 08:06:09 xfig
+add 12 06:21:59 bash
+add 13 04:11:20 nautilus
+add 6 04:37:34 gnome
+add 4 16:19:47 gcalc
+add 17 22:40:32 x-session
+add 1 07:33:25 printer-deamon
+add 3 03:53:17 gimp
+quit

@@ -1,3 +1,14 @@
+/***
+ * AUTHOR:       LUIZ EDUARDO SATELIS DOS SANTOS - 2017.0743.044-6
+ * AUTHOR:       LUIZ FERNANDO POSTINGEL QUIRINO - 2016.0743.003-7
+ * DATE:         24 Nov 2020
+ * NOTES:
+ *  Materiais consultados:
+ *      -> Materiais de aula Prof. Ivone / Prof. Ronaldo
+ *      -> Listas encadeadas -> Celes Rangel - unicamp https://www.ic.unicamp.br/~ra069320/PED/MC102/1s2008/Apostilas/Cap10.pdf
+ *      -> Funções com numero variável de argumentos - https://daemoniolabs.wordpress.com/2012/09/09/criando-funcoes-com-numero-variavel-de-argumentos-em-c/
+ */
+
 /**
  * Armazena horário de chegada
  * preferimos não usar esta estrutura extra para facilitar a manipulação dos dados

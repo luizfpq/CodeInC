@@ -89,14 +89,14 @@ void add_t(celula **Lista_temp, int pri, int hh, int mm, int ss, char *descricao
     p = NULL;
     q = *Lista_temp;
 
-    /*anda na celula até o final, ou até encontrar o elemento seguinte ao que deseja inserir*/
+    /*anda na lista até o final, ou até encontrar o elemento seguinte ao que deseja inserir*/
     while (q != NULL && (timestamp(hh, mm, ss) > timestamp(q->chegada.hh, q->chegada.mm, q->chegada.ss)))
     {
         p = q;
         q = q->prox;
     }
     /*cria uma nova celula para a celula e atribui valor a ela*/
-    novo = (celula *)malloc(sizeof(celula));
+    novo = (celula *) malloc(sizeof(celula));
     novo->prior = pri;
     novo->chegada.hh = hh;
     novo->chegada.mm = mm;
@@ -108,8 +108,8 @@ void add_t(celula **Lista_temp, int pri, int hh, int mm, int ss, char *descricao
         novo->prox = NULL;
     else
         novo->prox = q;
-    /*verifica se está no começo da celula, se estiver indica o novo item como primeiro na "cabeça" da celula
-    são estiver, o p->prox aponta pro item novo*/
+    /*verifica se está no começo da celula, se estiver indica o novo item como 
+    primeiro na "cabeça" da celula são estiver, o p->prox aponta pro item novo*/
     if (p != NULL)
         p->prox = novo;
     else
@@ -211,7 +211,6 @@ void change_p(celula **Lista_prior, int ant, int nov)
 
         /*adiciono na nova posição*/
         add_p(Lista_prior, nov, a->prox->chegada.hh, a->prox->chegada.mm, a->prox->chegada.ss, a->prox->descricao);
-
         /**
          *  removo o item
          * TODO: verificar eficiencia
